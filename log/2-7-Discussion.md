@@ -3,7 +3,7 @@
 ####Topic: New York Trip Planner
 ####Target Audience: 
 - New visitors in New York
-- People who have free time and need to find something to do in New York*
+- People who have free time and need to find something to do in New York
 
 
 ####Final visualization sample:
