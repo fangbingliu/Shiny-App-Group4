@@ -1,0 +1,1 @@
+Log folder contains every meeting's discussion (ideas, plans, timeline...)
