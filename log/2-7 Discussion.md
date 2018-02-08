@@ -1,6 +1,8 @@
+
 ##2018/2/7 Project 2 Discusion 
 
 ####Topic: New York Trip Planner
+
 ####Target Audience: 
 - New visitors in New York
 - People who have free time and need to find something to do in New York
@@ -14,7 +16,7 @@
     - Time/Cost: May appear on the left panel or after chose the route?
 
 ####Visualization Sample:
-![](/Users/crystal/Desktop/5243-ADS/Spring2018-Project2-group-4/log/demo.jpg)
+![demo](/Users/crystal/Desktop/5243-ADS/Spring2018-Project2-group-4/log/demo.jpg)
 
 - According to the choices, pick 3 or 5 different routes and show the score of each route. (May also add time spend and money cost.)
 - Different routes can show with different colors and different types of locations can also be label with different colors.
