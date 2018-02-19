@@ -1,42 +1,89 @@
+#install.packages("shinythemes")
 library(shiny)
 library(leaflet)
+library(shinythemes)
+library(markdown)
 
-# Define UI for application that draws a histogram
-shinyUI(fluidPage(
-  
-  # Application title
-  titlePanel("2009 Manhattan Housing Sales"),
-  
-  # Sidebar with a selector input for neighborhood
-  sidebarLayout(
-    sidebarPanel(
-      selectInput("nbhd", label = h5("Choose a Manhattan Neighborhood"), 
-                         choices = list("all neighborhoods"=0,
-                                        "Central Harlem"=1, 
-                                        "Chelsea and Clinton"=2,
-                                        "East Harlem"=3, 
-                                        "Gramercy Park and Murray Hill"=4,
-                                        "Greenwich Village and Soho"=5, 
-                                        "Lower Manhattan"=6,
-                                        "Lower East Side"=7, 
-                                        "Upper East Side"=8, 
-                                        "Upper West Side"=9,
-                                        "Inwood and Washington Heights"=10), 
-                         selected = 0)
-      #sliderInput("p.range", label=h3("Price Range (in thousands of dollars)"),
-      #            min = 0, max = 20000, value = c(200, 10000))
-    ),
-    # Show two panels
-    mainPanel(
-      #h4(textOutput("text")),
-      h3(code(textOutput("text1"))),
-      tabsetPanel(
-        # Panel 1 has three summary plots of sales. 
-        tabPanel("Sales summary", plotOutput("distPlot")), 
-        # Panel 2 has a map display of sales' distribution
-        tabPanel("Sales map", plotOutput("distPlot1"))),
-      leafletOutput("map", width = "80%", height = "400px")
-    )
- )
+##################Home Page(Fangbing Liu)#####################
+shinyUI(
+  fluidPage(
+    theme = shinythemes::shinytheme("journal"),
+    navbarPage("NYC Trip Planner",
+             tabPanel("Home",
+                      mainPanel(fluidRow(
+                        column(9, align="center", offset = 3,
+                               tags$iframe(width = "720", height = "480", align = "middle", src = "https://www.youtube.com/embed/A-_uX2cdUdM",
+                                           frameborder = "0", allowfullscreen = "allowfullscreen")),
+                        column(12, align="center", offset = 6,
+                               h4("Click Explore to Start!", align = "center", style = "color:#FF0000")))),
+                      tags$head(
+                        tags$style(HTML("body{background-image: url(background.jpg);}")))),
+             
+##################Explore page(Fangbing Liu)###################             
+             tabPanel("Explore",
+                      sidebarLayout(
+                        sidebarPanel(
+                          width = 3,
+                          # Introduction
+                          helpText("You can enter your location or click on the map.",
+                                   "Then choose what activities you want to do."),
+                          
+                          # Enter Location
+                          textInput("Location", label = h4("Location:"), value = "Enter location..."),
+                          
+                          # Choose Activities
+                          checkboxGroupInput("Activities", label = h4("Activities:"), 
+                                            choices = list("Restaurant" = 1, "Shopping" = 2, "Museum/Gallery" = 3, "Library" = 4, "Sightseeing" = 5),
+                                            selected = NULL)
+                          ),
+                        
+                        mainPanel(# Add map here)
+                      ))),
+            
+############Recommendation Page(Fangbing Liu)#################                    
+                                  
+             tabPanel("Recommendation",
+                      tabsetPanel(
+                        
+                        tabPanel("Top 10 Tourist Attractions",
+                                 mainPanel(
+                                   fluidRow(
+                                     
+                                     column(6,
+                                            dataTableOutput("Rank1")),
+                                           
+                                     column(6,
+                                            leafletOutput("maprec1", width = "200%", height = 600)),
+                                     
+                                     helpText(a("For more information, click here", href = "http://www.planetware.com/tourist-attractions-/new-york-city-us-ny-nyc.htm"))
+                                     
+                                     )
+                                   )),
+                        
+                        tabPanel("Top 10 Hottest Restaurants in 2018",
+                                 mainPanel(
+                                   fluidRow(
+                                     
+                                     column(6,
+                                            dataTableOutput("Rank2")),
+                                            
+                                     column(6,
+                                            leafletOutput("maprec2", width = "200%", height = 600)),
+                                     helpText(a("For more information, click here", href = "https://ny.eater.com/maps/best-new-nyc-restaurants-heatmap"))
+                                     )
+                                 ))
+                        )),
+             
+###################About US Page(Fangbing Liu)#################
+
+             tabPanel("About Us",
+                      fluidRow(
+                        column(7, img(src='thankyou.gif', align = "right")),
+                        column(8, align="center", offset = 2, includeMarkdown("contact.md"))
+                        )
+                      )
 ))
-
+)
+       
+       
+    
