@@ -1,8 +1,32 @@
-#install.packages("shinythemes")
+packages.used=c("shiny", "shinythemes", "shinydashboard", "dplyr", 
+                "leaflet","maps", "DT", "dtplyr", "lubridate", "TSP", "maptools", "stringr",
+                "bitops", "ggmap", "ggplot2")
+
+# check packages that need to be installed.
+packages.needed=setdiff(packages.used, 
+                        intersect(installed.packages()[,1], 
+                                  packages.used))
+# install additional packages
+if(length(packages.needed)>0){
+  install.packages(packages.needed, dependencies = TRUE,
+                   repos='http://cran.us.r-project.org')
+}
+
 library(shiny)
-library(leaflet)
 library(shinythemes)
-library(markdown)
+library(shinydashboard)
+library(dplyr)
+library(leaflet)
+library(maps)
+library(DT)
+library(dtplyr)
+library(lubridate)
+library(TSP)
+library(maptools)
+library(stringr)
+library(bitops)
+library(ggmap)
+library(ggplot2)
 
 ##################Home Page(Fangbing Liu)#####################
 shinyUI(
@@ -24,21 +48,37 @@ shinyUI(
                       sidebarLayout(
                         sidebarPanel(
                           width = 3,
+                          
                           # Introduction
-                          helpText("You can enter your location or click on the map.",
-                                   "Then choose what activities you want to do."),
+                          helpText("You can enter your location.(Ex: Columbia University), 
+                                   then choose what activities you want to do and how far you want to go."),
                           
                           # Enter Location
-                          textInput("Location", label = h4("Location:"), value = "Enter location..."),
+                          textInput("input", label = h4("Location:"), value = "Enter location..."),
                           
                           # Choose Activities
-                          checkboxGroupInput("Activities", label = h4("Activities:"), 
-                                            choices = list("Restaurant" = 1, "Shopping" = 2, "Museum/Gallery" = 3, "Library" = 4, "Sightseeing" = 5),
+                          checkboxGroupInput("type", label = h4("Activities:"), 
+                                            choices = list("Restaurant" = 1, "Shopping" = 2, "Museum/Gallery" = 3, 
+                                                           "Library" = 4, "Sightseeing" = 5, "WIFI" = 6),
                                             selected = NULL)
                           ),
-                        
-                        mainPanel(# Add map here)
-                      ))),
+                          
+                          # Choose Radius
+                          sliderInput("DIST", label = "Distance From Your Starting Point(km):",
+                                      min = 1, max = 20, value = 3, step = 0.5),
+                          hr(),
+                         
+                          # Map
+                          mainPanel(
+                            
+                            fluidRow(
+                              column(6, DT::dataTableOutput('table')),
+                              column(6, verbatimTextOutput('sitestogo'))
+                            ),
+                            leafletOutput("route", width = "110%", height = 600))
+                            #leafletOutput("map", width = "110%", height = 600)
+                        )
+                      )),
             
 ############Recommendation Page(Fangbing Liu)#################                    
                                   
@@ -53,7 +93,7 @@ shinyUI(
                                             dataTableOutput("Rank1")),
                                            
                                      column(6,
-                                            leafletOutput("maprec1", width = "200%", height = 600)),
+                                            leafletOutput("maprec1", width = "200%", height = 580)),
                                      
                                      helpText(a("For more information, click here", href = "http://www.planetware.com/tourist-attractions-/new-york-city-us-ny-nyc.htm"))
                                      
@@ -68,7 +108,7 @@ shinyUI(
                                             dataTableOutput("Rank2")),
                                             
                                      column(6,
-                                            leafletOutput("maprec2", width = "200%", height = 600)),
+                                            leafletOutput("maprec2", width = "200%", height = 580)),
                                      helpText(a("For more information, click here", href = "https://ny.eater.com/maps/best-new-nyc-restaurants-heatmap"))
                                      )
                                  ))
@@ -83,7 +123,6 @@ shinyUI(
                         )
                       )
 ))
-)
-       
+
        
     
