@@ -54,31 +54,24 @@ shinyUI(
                                    then choose what activities you want to do and how far you want to go."),
                           
                           # Enter Location
-                          textInput("input", label = h4("Location:"), value = "Enter location..."),
+                          textInput("location", label = h4("Location:"), value = "Enter location..."),
                           
                           # Choose Activities
                           checkboxGroupInput("type", label = h4("Activities:"), 
                                             choices = list("Restaurant" = 1, "Shopping" = 2, "Museum/Gallery" = 3, 
                                                            "Library" = 4, "Sightseeing" = 5, "WIFI" = 6),
-                                            selected = NULL)
-                          ),
+                                            selected = NULL),
                           
                           # Choose Radius
-                          sliderInput("DIST", label = "Distance From Your Starting Point(km):",
-                                      min = 1, max = 20, value = 3, step = 0.5),
-                          hr(),
-                         
-                          # Map
-                          mainPanel(
-                            
-                            fluidRow(
-                              column(6, DT::dataTableOutput('table')),
-                              column(6, verbatimTextOutput('sitestogo'))
-                            ),
-                            leafletOutput("route", width = "110%", height = 600))
-                            #leafletOutput("map", width = "110%", height = 600)
-                        )
-                      )),
+                          sliderInput("DIST", label = h4("Distance From Your Starting Point(km):"),
+                                      min = 1, max = 20, value = 3, step = 0.5)),
+                      # Map
+                      mainPanel(
+                        fluidRow(
+                          column(6,
+                                 leafletOutput("map", width = "110%", height = 600))
+                        )))
+                      ),
             
 ############Recommendation Page(Fangbing Liu)#################                    
                                   
@@ -123,6 +116,6 @@ shinyUI(
                         )
                       )
 ))
-
+)
        
     

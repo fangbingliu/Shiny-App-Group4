@@ -90,19 +90,46 @@ shinyServer(function(input, output, session){
  # sitesmap <- routeplan(sitestogo_rec(),30000)
   
   # MAP
-  #output$map <- renderLeaflet({
-  #  leaflet() %>%
-  #    addTiles(group = "OSM") %>%
-  #    addProviderTiles("Stamen.TonerLite") %>%
-  #    addLayersControl(baseGroups = c("OSM", "Stamen.TonerLite")) %>%
-  #    setView(lng = -73.935242, lat = 40.730610, zoom = 12)
-  #    })
-
-  #output$route <- renderLeaflet({
-  #  route_df <- siteswithinrange_rec()[input$table_rows_selected,]
-  #  source( "./Route acc Type.R" )
-  #})
+  route_df <- reactive({
+    route_df = route_df
+  })
   
+  #rownames(route_df)<- c(1:nn)
+  
+  my_list <- reactive({
+    my_list <- list()
+    r <- 1
+    for (i in 1:(nn-1)) {
+      for (j in ((i+1):nn)) {
+        my_route <- viaroute(route_df$latitude[i], route_df$longtitude[i],route_df$latitude[j], route_df$longtitude[j])
+        geom <- decode_geom(my_route$routes[[1]]$geometry)
+        my_list[[r]] <- geom
+        r <- r + 1
+      }
+    }
+  })
+  
+  output$map <- renderLeaflet({
+    leaflet() %>%
+      addTiles(group = "OSM") %>%
+      addProviderTiles("Stamen.TonerLite") %>%
+      setView(lng = -73.935242, lat = 40.730610, zoom = 12) %>%
+      addLayersControl(baseGroups = c("OSM", "Stamen.TonerLite")) %>%
+      addCircleMarkers(lat = route_df$latitude,
+                       lng = route_df$longtitude,
+                       color = "red",
+                       stroke = FALSE,
+                       radius = 5,
+                       fillOpacity = 0.8) %>%
+      addLayersControl(baseGroups = c("OSM", "Stamen.TonerLite")) %>%
+      {
+        for (i in 1:length(my_list)) {
+          . <- addPolylines(., lat = my_list[[i]]$lat, lng = my_list[[i]]$lng, color = "red", weight = 4)
+        }
+        return(.)
+      }
+  })
+ 
 ###############Recommendation Page(Fangbing Liu)##################
 
   #The top 10 tourist attractions rank
