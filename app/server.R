@@ -1,17 +1,6 @@
-packages.used=c("shiny", "shinythemes", "shinydashboard", "dplyr", 
-                "leaflet","maps", "DT", "dtplyr", "lubridate", "TSP", "maptools", "stringr",
-                "bitops", "ggmap", "ggplot2")
-
-# check packages that need to be installed.
-packages.needed=setdiff(packages.used, 
-                        intersect(installed.packages()[,1], 
-                                  packages.used))
-# install additional packages
-if(length(packages.needed)>0){
-  install.packages(packages.needed, dependencies = TRUE,
-                   repos='http://cran.us.r-project.org')
-}
-
+if (!require("DT")) install.packages('DT')
+if (!require("dtplyr")) install.packages('dtplyr')
+if(!require("lubridate")) install.packages('lubridate')
 library(shiny)
 library(shinythemes)
 library(shinydashboard)
@@ -21,22 +10,13 @@ library(maps)
 library(DT)
 library(dtplyr)
 library(lubridate)
-library(TSP)
-library(maptools)
-library(stringr)
-library(bitops)
-library(ggmap)
-library(ggplot2)
-
-source( "./Route acc Type.R" )
 
 ##########################Load Data###############################
 Recommendation <- read.csv("../data/project_data/Recommendation.csv", header = T, stringsAsFactors = F)
 Rank1 <- Recommendation[12:21, ]
 Rank2 <- Recommendation[1:10, ]
-dataframe<-read.csv("../data/alldata.csv")
 
-####################Calculate Distance(Peifeng Hong)#######################
+####################Calculate Distance(Peifeng Hong#######################
 
 ##function calculating the distance of start points and sites
 Pi <- 3.14159
@@ -57,95 +37,193 @@ sitesdataset <- read.csv("../data/alldata.csv",stringsAsFactors = F)
 
 shinyServer(function(input, output, session){
   
-#################Explore page#######################
-
+  #################Explore page#######################
+  
   # Choose Radius(Peifeng Hong)
   
   ##starting point ( to be changed )
   
-  startlat <- start$latitude
-  startlon <- start$longtitude
+  find_geom <- function(x){
+    output <- geocode(x, output = "latlona")[,c(1,2)]
+    output$type <- "start"
+    output$name <- x
+    output[,"X"] <- 30000
+    return(output)
+  }
+  
+  start <- reactive({
+    as.data.frame(find_geom(input$variable))
+  })
+
+  startlat <-  40.80754
+  startlon <-  -73.96257
   
   #distance to start point
   disttosites <- rep(NA,nrow(sitesdataset))
   for (i in 1:nrow(sitesdataset))
-     disttosites[i] <- distcalculate(startlat,startlon,sitesdataset$latitude[i],sitesdataset$longtitude[i])
+    disttosites[i] <- distcalculate(startlat,startlon,sitesdataset$latitude[i],sitesdataset$longtitude[i])
   
   
-   siteswithinrange_rec <- reactive({
-     siteswithinrange <- filter(data.frame(sitesdataset,
-                                           dist = disttosites),disttosites < input$DIST, type %in% input$type)
-     siteswithinrange})
+  siteswithinrange_rec <- reactive({
+    siteswithinrange <- filter(data.frame(sitesdataset,
+                                          dist = disttosites),disttosites < input$DIST, type %in% input$type)
+    siteswithinrange})
   
+  observe({print(siteswithinrange_rec()[1,])})
   ##dataset with name 
   output$table <- DT::renderDataTable(siteswithinrange_rec()[,c("name","type","dist")],server = T)
-  
+
+  # delete  
   output$sitestogo <- renderPrint({
     cat('\nSelected Sites\n')
-     print(siteswithinrange_rec()[input$table_rows_selected,c('name','dist')])
-  })   
+    print(siteswithinrange_rec()[input$table_rows_selected,])
+  })  
   
- 
+  # to be moved above
+  library(TSP)
   
- # sitesmap <- routeplan(sitestogo_rec(),30000)
-  
-  # MAP
-  route_df <- reactive({
-    route_df = route_df
-  })
-  
-  #rownames(route_df)<- c(1:nn)
-  
-  my_list <- reactive({
-    my_list <- list()
-    r <- 1
-    for (i in 1:(nn-1)) {
-      for (j in ((i+1):nn)) {
-        my_route <- viaroute(route_df$latitude[i], route_df$longtitude[i],route_df$latitude[j], route_df$longtitude[j])
-        geom <- decode_geom(my_route$routes[[1]]$geometry)
-        my_list[[r]] <- geom
-        r <- r + 1
+  # routeplan to update numeric x y
+  routeplan<-function(df,startpoint){
+    f_dis<-function(x,y){
+      r=6371
+      x=as.numeric(x)*pi/180;y=as.numeric(y)*pi/180
+      a=c(cos(x[2])*cos(x[1]),cos(x[2])*sin(x[1]),sin(x[2]))
+      b=c(cos(y[2])*cos(y[1]),cos(y[2])*sin(y[1]),sin(y[2]))
+      cosg=sum(a*b)/sqrt(sum(a^2)*sum(b^2))
+      dis=r*acos(cosg)
+      return(dis)
+    }
+    k<-cbind(df$longtitude,df$latitude)
+    len<-nrow(df)
+    dis_mat<-matrix(NA,len,len)
+    for (i in 1:len){
+      for(j in 1:len){
+        dis_mat[i,j]=f_dis(k[i,],k[j,])
       }
     }
+    colnames(dis_mat)<-rownames(dis_mat)<-df$X
+    tsp<-TSP(dis_mat)
+    tour<-solve_TSP(tsp,method="2-opt")
+    path<-as.integer(tour)
+    tour_length(tsp,tour)
+    tsp_map<-df[path,]
+    line<-tsp_map$X
+    c1<-line[which(line==startpoint):length(line)]
+    c2<-line[1:which(line==startpoint)]
+    route<-c(as.vector(c1), as.vector(c2))
+    return(route)
+  }
+  
+  # output$orderofsites <- renderPrint({
+  #   cat('\norder of Sites\n')
+  #   startpoint <- c(30000,startlon,  startlat,"start",  "start")
+  # 
+  #   dfsites <- rbind(startpoint,siteswithinrange_rec()[input$table_rows_selected,])
+  #  # print(dfsites) 
+  #   orderofsites <- as.vector(routeplan(dfsites,30000))
+  #   print(orderofsites)
+  # }) 
+  
+  output$orderofsites <- renderPrint({
+    cat('\norder of Sites\n')
+    startpoint <- c(30000,startlon,  startlat,"start",  "start")
+    dfsites <- rbind(startpoint,siteswithinrange_rec()[input$table_rows_selected,])
+    orderofsites <- as.vector(routeplan(dfsites,30000))
+    
+    col <- NULL
+    for (i in 1:length(orderofsites)){
+      col[i] <- which(dfsites$X==orderofsites[i])
+      
+    }
+    route_name <- dfsites[as.vector(col),]$name
+    nn <- nrow(route_name)
+    print(as.data.frame(route_name))
+    #  print(route_df)
   })
+  
+  # output$map <- renderLeaflet({
+  #   leaflet() %>%
+  #     addTiles(group = "OSM") %>%
+  #     setView(lng = -73.935242,lat = 40.730610,zoom = 12) %>%
+  #     addCircleMarkers(lng = as.numeric(start()$lon),
+  #                      lat = as.numeric(start()$lat),
+  #                      color = "red",
+  #                      stroke = FALSE,
+  #                      radius = 6,
+  #                      fillOpacity = 0.8)
+  # })
+    
+  # output$map <- renderLeaflet({
+  # if (!isolate(input$table_rows_selected))
+  #      (route_df <- data.frame(startlon,startlat))
+  #  else
+  #  {
+  #   startpoint <- c(30000,startlon,  startlat,"start",  "start")
+  #   route_df <- data.frame(longtitude = startlon,latitude = startlat)
+  #   dfsites <- rbind(startpoint,siteswithinrange_rec()[input$table_rows_selected,])
+  #   orderofsites <- as.vector(routeplan(dfsites,30000))
+  # 
+  # 
+  #   col <- NULL
+  #   for (i in 1:length(orderofsites)){
+  #   col[i] <- which(dfsites$X==orderofsites[i])
+  # 
+  # }
+  # route_df <- dfsites[as.vector(col),c(2,3)]
+  # nn <- nrow(route_df)
+  # 
+  # leaflet() %>%
+  #   addTiles(group = "OSM") %>%
+  #   #setView(lng = startlon,lat = startlat,zoom = 12) %>%
+  #   setView(lng = -73.935242,lat = 40.730610,zoom = 12) %>%
+  #   addMarkers(lng = as.numeric(route_df$longtitude),
+  #                    lat = as.numeric(route_df$latitude))%>%
+  #   addCircleMarkers(lng = as.numeric(start()$lon),
+  #                  lat = as.numeric(start()$lat),
+  #                  color = "red",
+  #                  stroke = FALSE,
+  #                  radius = 6,
+  #                  fillOpacity = 0.8)
+  # }})
   
   output$map <- renderLeaflet({
+
+    startpoint <- c(30000,startlon,  startlat,"start",  "start")
+    route_df <- data.frame(longtitude = startlon,latitude = startlat)
+    dfsites <- rbind(startpoint,siteswithinrange_rec()[input$table_rows_selected,])
+    orderofsites <- as.vector(routeplan(dfsites,30000))
+
+
+    col <- NULL
+    for (i in 1:length(orderofsites)){
+      col[i] <- which(dfsites$X==orderofsites[i])
+
+    }
+    route_df <- dfsites[as.vector(col),c(2,3)]
+    nn <- nrow(route_df)
+
     leaflet() %>%
       addTiles(group = "OSM") %>%
-      addProviderTiles("Stamen.TonerLite") %>%
-      setView(lng = -73.935242, lat = 40.730610, zoom = 12) %>%
-      addLayersControl(baseGroups = c("OSM", "Stamen.TonerLite")) %>%
-      addCircleMarkers(lat = route_df$latitude,
-                       lng = route_df$longtitude,
-                       color = "red",
-                       stroke = FALSE,
-                       radius = 5,
-                       fillOpacity = 0.8) %>%
-      addLayersControl(baseGroups = c("OSM", "Stamen.TonerLite")) %>%
-      {
-        for (i in 1:length(my_list)) {
-          . <- addPolylines(., lat = my_list[[i]]$lat, lng = my_list[[i]]$lng, color = "red", weight = 4)
-        }
-        return(.)
-      }
+      setView(lng = -73.96257, lat = 40.7580, zoom = 12) %>%
+      addCircleMarkers(lng = as.numeric(route_df$longtitude),
+                       lat = as.numeric(route_df$latitude))
   })
- 
-###############Recommendation Page(Fangbing Liu)##################
-
+  ###############Recommendation Page(Fangbing Liu)##################
+  
   #The top 10 tourist attractions rank
   output$Rank1 <- renderDataTable({
-  
+    
     datatable(Rank1[, c("Rank", "Name")], rownames = FALSE)%>% formatStyle(
       'Name', 
       target = 'row', color = 'black', backgroundColor = 'lightpurple')
-    }, server = TRUE)
+  }, server = TRUE)
   
   #Map
   output$maprec1 <- renderLeaflet({
     leaflet() %>%
       addTiles() %>%
       setView(lng = -73.9712, lat = 40.7580, zoom = 12) %>%
-      addCircleMarkers(lng = as.numeric(Rank1$longitude),
+      addMarkers(lng = as.numeric(Rank1$longitude),
                  lat = as.numeric(Rank1$latitude),
                  popup = paste("<b>Rank:</b>", Rank1$Rank, "<br>",
                                "<b>Name:</b>", Rank1$Name, "<br>",
@@ -156,8 +234,7 @@ shinyServer(function(input, output, session){
                 popup = paste("<b>Rank:</b>", Rank1$Rank[input$Rank1_rows_selected], "<br>",
                               "<b>Name:</b>", Rank1$Name[input$Rank1_rows_selected], "<br>",
                               "<b>Address:</b>", Rank1$Address[input$Rank1_rows_selected], "<br>",
-                              "<b>Description:</b>", Rank1$Description[input$Rank1_rows_selected]),
-                options = popupOptions(closeButton = FALSE))
+                              "<b>Description:</b>", Rank1$Description[input$Rank1_rows_selected]))
   })
   
   #Top 10 Restaurant rank
@@ -166,14 +243,14 @@ shinyServer(function(input, output, session){
     datatable(Rank2[, c("Rank", "Name")], rownames = FALSE)%>% formatStyle(
       'Name', 
       target = 'row', color = 'black', backgroundColor = 'lightpurple')
-    }, server = TRUE)
+  }, server = TRUE)
   
   #Map
   output$maprec2 <- renderLeaflet({
     leaflet() %>%
       addTiles() %>%
       setView(lng = -73.9712, lat = 40.7500, zoom = 13) %>%
-      addCircleMarkers(lng = as.numeric(Rank2$longitude),
+      addMarkers(lng = as.numeric(Rank2$longitude),
                  lat = as.numeric(Rank2$latitude),
                  popup = paste("<b>Rank:</b>", Rank2$Rank, "<br>",
                                "<b>Name:</b>", Rank2$Name, "<br>",

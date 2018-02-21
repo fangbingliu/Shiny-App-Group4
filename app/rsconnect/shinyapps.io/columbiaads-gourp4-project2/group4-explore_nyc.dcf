@@ -1,0 +1,12 @@
+name: group4-explore_nyc
+title: Group4-Explore NYC!
+username:
+account: columbiaads-gourp4-project2
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 286579
+bundleId: 1234196
+url: https://columbiaads-gourp4-project2.shinyapps.io/group4-explore_nyc/
+when: 1519254145.20981
+asMultiple: FALSE
+asStatic: FALSE
