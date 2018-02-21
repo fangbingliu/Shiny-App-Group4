@@ -21,15 +21,21 @@ Term: Spring 2018
 
 + Team #
 + **Projec title**: + Team members
-	+ team member 1
-	+ team member 2
-	+ team member 3
-	+ team member 4
-	+ team member 5
+	+ Fangbing Liu
+	+ Tao Guo
+	+ Linna Yu
+	+ Peifeng Hong
+	+ Mingming Liu
 
-+ **Project summary**: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
++ **Project summary**:  New York, an energetic and amazing city! New York, one of the most popular cities in the world, is the paradise for visitors all over the world. There are lots of superb restaurants, shopping malls, museums and libraries. Too many choices always mean too hard to make determinations. And sometimes it is hard for people to choose their destinations. You don’t need to worry about where to go in New York and what you need to consider is how to schedule your time scientifically. 
 
-+ **Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement. 
+Our app “Explore NYC” provides a new method for you to visit New York City. Using this app, you can choose where you want to go, such as restaurant or museum. Then our app will show relevant recommendations. Finally, the map will plan a short route for you and you can follow this route to visit NYC. The goal of “Explore NYC” is to save your time and help you to explore New York City. Now, it is your time to use our app!
+
+
++ **Contribution statement**: 
+Peifeng Hong and Tao Guo designed the algorithm to select the destinations. Linna Yu and Mingming Liu designed the map and planed the route. Fangbing Liu was responsible for designing the shiny app page. 
+All teammates contributed to the Github repository and upload the data and prepared the presentation. 
+
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
 
