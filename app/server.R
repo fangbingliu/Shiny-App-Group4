@@ -12,7 +12,7 @@ library(dtplyr)
 library(lubridate)
 
 ##########################Load Data###############################
-Recommendation <- read.csv("../data/project_data/Recommendation.csv", header = T, stringsAsFactors = F)
+Recommendation <- read.csv("../data/Recommendation.csv", header = T, stringsAsFactors = F)
 Rank1 <- Recommendation[12:21, ]
 Rank2 <- Recommendation[1:10, ]
 
