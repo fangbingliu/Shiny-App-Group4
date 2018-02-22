@@ -1,15 +1,15 @@
 # Project 2: Open Data App - an RShiny app development project
 
 ### [Project Description](doc/project2_desc.md)
-<<<<<<< HEAD
-Url:https://columbiaads-gourp4-project2.shinyapps.io/group4-explore_nyc/
+
 =======
 
->>>>>>> 2f8a3c4eb6c202e01419fb4ebc59524937c59fb5
+
 
 ## [Explore NYC](https://columbiaads-gourp4-project2.shinyapps.io/group4-explore_nyc/)
 
 ![screenshot](doc/desc.png)
+
 
 Term: Spring 2018
 
