@@ -3,7 +3,7 @@
 ### [Project Description](doc/project2_desc.md)
 
 
-## Explore NYC
+## [Explore NYC](https://columbiaads-gourp4-project2.shinyapps.io/group4-explore_nyc/)
 
 ![screenshot](doc/desc.png)
 
