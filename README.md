@@ -1,12 +1,6 @@
 # Project 2: Open Data App - an RShiny app development project
 
-### [Project Description](doc/project2_desc.md)
-
-=======
-
-
-
-## [Explore NYC](https://columbiaads-gourp4-project2.shinyapps.io/group4-explore_nyc/)
+## Click it to see our App: [Explore NYC](https://columbiaads-gourp4-project2.shinyapps.io/group4-explore_nyc/)
 
 ![screenshot](doc/desc.png)
 
